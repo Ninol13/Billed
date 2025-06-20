@@ -55,17 +55,14 @@ describe("Given I am connected as an employee", () => {
   
       // Crée une fonction mock pour la méthode modal de jQuery
       const mockFn = jest.fn((arg) => true);
-  
       // Attribue la fonction mock à la méthode modal de jQuery globalement
       global.$.fn.modal = mockFn;
   
-      // Crée un objet simulé documentMock pour les méthodes de sélection
       const documentMock = {
         querySelector: () => null,
         querySelectorAll: () => null,
       };
   
-      // Crée un objet simulé storeMock pour la méthode list
       const storeMock = {
         bills: () => ({
           list: () => ({
@@ -84,17 +81,14 @@ describe("Given I am connected as an employee", () => {
   
       // Appelle la méthode handleClickIconEye avec un attribut fictif
       billsObject.handleClickIconEye({ getAttribute: () => "fakeUrl" });
-  
       // Vérifie si la fonction mock a été appelée une fois
       expect(mockFn.mock.calls).toHaveLength(1);
     }); 
   });
   describe("When I click on the new expense report button", () => {
     test("Then it should call onNavigate with the correct route", () => {
-      // Créez une fonction mock pour onNavigate
       const mockOnNavigate = jest.fn();
   
-      // Créez un objet Bills avec le mock onNavigate
       const billsObject = new Bills({
         document,
         onNavigate: mockOnNavigate,
@@ -102,7 +96,6 @@ describe("Given I am connected as an employee", () => {
         localStorage: {},
       });
   
-      // Appelez la fonction handleClickNewBill
       billsObject.handleClickNewBill();
   
       // Vérifiez si onNavigate a été appelée avec la bonne route
@@ -114,7 +107,7 @@ describe("Given I am connected as an employee", () => {
       "date": "unformatted date"
       }];
   
-      // Crée un objet simulé storeMock avec une méthode list qui retourne les factures corrompues
+    // Crée un objet storeMock avec une méthode list qui retourne les factures corrompues
     const storeMock = {
       bills: () => {
         return {
@@ -137,10 +130,8 @@ describe("Given I am connected as an employee", () => {
   
     // Appelle la méthode getBills() pour obtenir les factures corrompues
     const testBillsError = billsObject.getBills();
-  
-    // Définit les données de factures attendues avec un statut "Refused" et une date non formatée
+    // Définit les données de factures attendues
     const expectedBillsError = [{ status: 'Refused', date: 'unformatted date' }];
-  
     // Vérifie si les factures obtenues correspondent aux données attendues
     expect(testBillsError).toEqual(expectedBillsError);
     });
