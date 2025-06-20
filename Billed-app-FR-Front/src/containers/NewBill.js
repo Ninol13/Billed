@@ -26,7 +26,7 @@ export default class NewBill {
     const allowedExtensions = ['jpg', 'jpeg', 'png'];
     const fileExtension = fileName.split('.').pop().toLowerCase();
     if (!allowedExtensions.includes(fileExtension)) {
-      const fileError = document.getElementById('file-error');
+      const fileError = this.document.getElementById('file-error');
       fileError.textContent = 'Fichier non autorisée. Veuillez sélectionner un fichier avec une extension JPG, JPEG ou PNG.';
       fileInput.value = ''; 
       return;
