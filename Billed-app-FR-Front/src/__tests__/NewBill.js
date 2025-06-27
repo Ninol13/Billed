@@ -27,11 +27,11 @@ describe("Given I am connected as an employee", () => {
             }
           },
           getElementById: mockGetElementById
-        }        
+        }
         const objInstance = new NewBill({
           document: documentMock,
           onNavigate: {},
-          store: {},            
+          store: {},
           localStorage: {}
         })
         // Appel de la fonction handleChangeFile avec des valeurs simulées
@@ -41,7 +41,7 @@ describe("Given I am connected as an employee", () => {
         expect(mockErrorObj.textContent).toBeTruthy()
       })
     })
-  }) 
+  })
   describe("when I upload a file with the good format", () => {
     test("then it should save the user's email", () => {
       const mockGetElementById = jest.fn()
@@ -51,7 +51,7 @@ describe("Given I am connected as an employee", () => {
 
       const createMock = jest.fn()
       const goodFormatFile = new File(['img'], 'image.png', { type: 'image/png' })
-       
+
       const documentMock ={
         querySelector: (s) => {
           if (s === 'input[data-testid="file"]') {
@@ -80,7 +80,7 @@ describe("Given I am connected as an employee", () => {
         localStorage: {}
       });
       // Appel de la fonction handleChangeFile avec des valeurs simulées
-      objInstance.handleChangeFile({ 
+      objInstance.handleChangeFile({
         preventDefault: () => true ,
         target: {value: "image.png"}
       })
@@ -133,7 +133,7 @@ describe("Given I am connected as an employee", () => {
         localStorage: {}
       });
 
-      objInstance.handleSubmit({ 
+      objInstance.handleSubmit({
         preventDefault: () => true ,
         target: {
           querySelector: (selector) => {
@@ -177,12 +177,11 @@ describe("Given I am connected as an employee", () => {
           fileName: null,
           status: 'pending'
       }
-      // Analyse des données passées à la fonction 
+      // Analyse des données passées à la fonction
       const data = JSON.parse(mockUpdate.mock.calls[0][0].data);
       console.log('data?', data);
 
       expect(data).toMatchObject(dataToCheck)
     })
   })
-  
 })

@@ -86,29 +86,39 @@ export default class {
   }
 
   handleEditTicket(e, bill, bills) {
-    if (this.counter === undefined || this.id !== bill.id) this.counter = 0
-    if (this.id === undefined || this.id !== bill.id) this.id = bill.id
-    if (this.counter % 2 === 0) {
+    // Si un autre billet était sélectionné avant, on réinitialise
+    if (this.selectedBillId !== bill.id) {
+      this.selectedBillId = bill.id
+
+      // Réinitialise tous les styles
       bills.forEach(b => {
         $(`#open-bill${b.id}`).css({ background: '#0D5AE5' })
       })
+
+      // Surligne la carte sélectionnée
       $(`#open-bill${bill.id}`).css({ background: '#2A2B35' })
+
+      // Affiche le formulaire de traitement
       $('.dashboard-right-container div').html(DashboardFormUI(bill))
       $('.vertical-navbar').css({ height: '150vh' })
-      this.counter ++
+
+      // Ajoute les écouteurs des boutons
+      $('#icon-eye-d').click(this.handleClickIconEye)
+      $('#btn-accept-bill').click((e) => this.handleAcceptSubmit(e, bill))
+      $('#btn-refuse-bill').click((e) => this.handleRefuseSubmit(e, bill))
     } else {
+      // Si on clique à nouveau sur le même billet, on le désélectionne
+      this.selectedBillId = null
+
       $(`#open-bill${bill.id}`).css({ background: '#0D5AE5' })
 
       $('.dashboard-right-container div').html(`
         <div id="big-billed-icon" data-testid="big-billed-icon"> ${BigBilledIcon} </div>
       `)
       $('.vertical-navbar').css({ height: '120vh' })
-      this.counter ++
     }
-    $('#icon-eye-d').click(this.handleClickIconEye)
-    $('#btn-accept-bill').click((e) => this.handleAcceptSubmit(e, bill))
-    $('#btn-refuse-bill').click((e) => this.handleRefuseSubmit(e, bill))
   }
+
 
   handleAcceptSubmit = (e, bill) => {
     const newBill = {
