@@ -3,6 +3,9 @@
  */
 
 import NewBill from "../containers/NewBill.js"
+import mockStore from "../__mocks__/store.js"
+
+jest.mock("../app/Store", () => mockStore)
 
 describe("Given I am connected as an employee", () => {
   describe("When I am on NewBill Page", () => {
@@ -13,10 +16,8 @@ describe("Given I am connected as an employee", () => {
         const mockErrorObj = {};
         mockGetElementById.mockReturnValue(mockErrorObj)
 
-        // Création d'un objet simulé avec des méthodes pour simuler le comportement attendu
         const documentMock = {
           querySelector: (s) => {
-            console.log('querySelector with ', s)
             if (s === 'input[data-testid="file"]') {
               return {
                 files: [wrongFormatFile],
@@ -34,14 +35,13 @@ describe("Given I am connected as an employee", () => {
           store: {},
           localStorage: {}
         })
-        // Appel de la fonction handleChangeFile avec des valeurs simulées
         objInstance.handleChangeFile({ preventDefault: () => true, target: {value: 'hello.txt'} })
-        // Vérification que la méthode getElementById a été appelée avec 'file-error' et mockErrorObj n'est pas vide
         expect(mockGetElementById).toHaveBeenCalledWith('file-error')
         expect(mockErrorObj.textContent).toBeTruthy()
       })
     })
   })
+
   describe("when I upload a file with the good format", () => {
     test("then it should save the user's email", () => {
       const mockGetElementById = jest.fn()
@@ -65,7 +65,7 @@ describe("Given I am connected as an employee", () => {
         },
         getElementById: mockGetElementById
       }
-      // Création d'un objet "store" simulé avec une méthode "create" qui renvoie une promesse résolue avec des données simulées
+
       const storeMock ={
         bills: () => {
           return {
@@ -79,46 +79,46 @@ describe("Given I am connected as an employee", () => {
         store: storeMock,
         localStorage: {}
       });
-      // Appel de la fonction handleChangeFile avec des valeurs simulées
       objInstance.handleChangeFile({
         preventDefault: () => true ,
         target: {value: "image.png"}
       })
-      // Vérification que l'adresse e-mail stockée est correctement transmise dans les données lors de l'appel à la méthode "create"
-      console.log('createMock.mock.calls[0][0].data', createMock.mock.calls[0][0].data)
       expect(createMock.mock.calls[0][0].data.get("email")).toEqual("user@email.com")
     })
   })
+
   describe('when submit new Bill', () => {
     test('then call update method on store', () => {
-
       const mockGetElementById = jest.fn()
       mockGetElementById.mockReturnValue({})
 
       localStorage.setItem("user", '{"email" : "user@email.com"}')
 
-      // Création d'une fonction fictive pour la création de fichiers et d'un fichier image au bon format
-      const createMock = jest.fn()
       const goodFormatFile = new File(['img'], 'image.png', { type: 'image/png' })
 
-      // Création d'un objet document fictif avec les méthodes querySelector et getElementById
       const documentMock ={
         querySelector: (s) => {
-          if (s === 'input[data-testid="file"]') {
-            return {
+          const inputs = {
+            'select[data-testid="expense-type"]': { value: 'typedefrais' },
+            'input[data-testid="expense-name"]': { value: 'nom' },
+            'input[data-testid="amount"]': { value: '12' },
+            'input[data-testid="datepicker"]': { value: 'date' },
+            'input[data-testid="vat"]': { value: 'tva' },
+            'input[data-testid="pct"]': { value: '34' },
+            'textarea[data-testid="commentary"]': { value: 'commentaire' },
+            'input[data-testid="file"]': {
               files: [goodFormatFile],
               addEventListener: () => true,
             }
-          } else {
-            return { addEventListener: () => true }
           }
+          return inputs[s] || { addEventListener: () => true }
         },
         getElementById: mockGetElementById
       }
-      // Création d'une fonction de mise à jour fictive (mock) qui renvoie une résolution vide
+
       const mockUpdate = jest.fn();
       mockUpdate.mockResolvedValue({})
-      // Création d'un store fictif avec une méthode bills qui renvoie un objet contenant la méthode update
+
       const storeMock ={
         bills: () => {
           return {
@@ -126,6 +126,7 @@ describe("Given I am connected as an employee", () => {
           }
         }
       }
+
       const objInstance = new NewBill({
         document: documentMock,
         onNavigate: () => {},
@@ -136,52 +137,76 @@ describe("Given I am connected as an employee", () => {
       objInstance.handleSubmit({
         preventDefault: () => true ,
         target: {
-          querySelector: (selector) => {
-            switch(selector) {
-              case 'select[data-testid="expense-type"]':
-                return {value: 'typedefrais'}
-                break;
-              case 'input[data-testid="expense-name"]':
-                return {value: 'nom'}
-                break;
-              case 'input[data-testid="amount"]':
-                return {value: '12'};
-                break;
-              case 'input[data-testid="datepicker"]':
-                return {value: 'date'};
-                break;
-              case 'input[data-testid="vat"]':
-                return {value: 'tva'};
-                break;
-              case 'input[data-testid="pct"]':
-                return {value: '34'};
-                break;
-              case 'textarea[data-testid="commentary"]':
-                return {value: 'commentaire'}
-                break;
-            }
-          }
+          querySelector: documentMock.querySelector
         }
       })
 
-      const dataToCheck = {
-          email: 'user@email.com',
-          type: 'typedefrais',
-          name:  'nom',
-          amount: 12,
-          date:  'date',
-          vat: 'tva',
-          pct: 34,
-          commentary: 'commentaire',
-          fileUrl: null,
-          fileName: null,
-          status: 'pending'
-      }
-      // Analyse des données passées à la fonction
       const data = JSON.parse(mockUpdate.mock.calls[0][0].data);
-      console.log('data?', data);
+      expect(data).toMatchObject({
+        email: 'user@email.com',
+        type: 'typedefrais',
+        name:  'nom',
+        amount: 12,
+        date:  'date',
+        vat: 'tva',
+        pct: 34,
+        commentary: 'commentaire',
+        fileUrl: null,
+        fileName: null,
+        status: 'pending'
+      })
+    })
+  })
 
-      expect(data).toMatchObject(dataToCheck)
+  describe("Integration test - POST new bill", () => {
+    beforeEach(() => {
+      jest.clearAllMocks()
+      localStorage.setItem("user", JSON.stringify({ email: "test@oc.fr" }))
+    })
+
+    test("should post new bill and return success", async () => {
+      const newBill = {
+        id: "1234",
+        email: "a@a",
+        name: "encore",
+        type: "Hôtel et logement",
+        amount: 400,
+        date: "2004-04-04",
+        vat: "80",
+        pct: 20,
+        commentary: "séminaire billed",
+        fileUrl: "https://...",
+        fileName: "preview-facture.jpg",
+        status: "pending"
+      };
+
+      const store = mockStore;
+      const createdBill = await store.bills().create({ data: newBill });
+
+      expect(createdBill).toEqual({
+        fileUrl: "https://localhost:3456/images/test.jpg",
+        key: "1234"
+      });
+    });
+
+    test("should throw 500 error", async () => {
+      mockStore.bills = () => ({
+        update: () => Promise.reject(new Error("Erreur 500"))
+      })
+
+      await expect(
+        mockStore.bills().update({ data: "fake", selector: "1" })
+      ).rejects.toThrow("Erreur 500")
+    })
+
+    test("should throw 404 error", async () => {
+      mockStore.bills = () => ({
+        update: () => Promise.reject(new Error("Erreur 404"))
+      })
+
+      await expect(
+        mockStore.bills().update({ data: "fake", selector: "1" })
+      ).rejects.toThrow("Erreur 404")
     })
   })
 })

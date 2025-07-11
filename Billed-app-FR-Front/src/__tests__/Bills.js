@@ -11,6 +11,8 @@ import {localStorageMock} from "../__mocks__/localStorage.js";
 import mockStore from "../__mocks__/store"
 import router from "../app/Router.js";
 
+jest.mock("../app/Store", () => mockStore)
+
 describe("Given I am connected as an employee", () => {
   describe("When I am on Bills Page", () => {
     test("Then bill icon in vertical layout should be highlighted", async () => {
@@ -185,6 +187,61 @@ describe("Given I am connected as an employee", () => {
       const result = await billsInstance.getBills();
       expect(result[0].date).toBe("invalid-date");
       expect(result[0].status).toBe("En attente");
+    });
+
+    test("Should show error message if API fails with 500", async () => {
+      mockStore.bills = () => ({
+        list: () => Promise.reject(new Error("Erreur 500"))
+      });
+
+      const billsInstance = new Bills({
+        document,
+        onNavigate: () => {},
+        store: mockStore,
+        localStorage: window.localStorage,
+      });
+
+      await expect(billsInstance.getBills()).rejects.toThrow("Erreur 500");
+    });
+
+    test("Should show error message if API fails with 404", async () => {
+      mockStore.bills = () => ({
+        list: () => Promise.reject(new Error("Erreur 404"))
+      });
+
+      const billsInstance = new Bills({
+        document,
+        onNavigate: () => {},
+        store: mockStore,
+        localStorage: window.localStorage,
+      });
+
+      await expect(billsInstance.getBills()).rejects.toThrow("Erreur 404");
+    });
+  });
+
+  describe("When API fails", () => {
+    beforeEach(() => {
+      Object.defineProperty(window, "localStorage", { value: localStorageMock });
+      window.localStorage.setItem("user", JSON.stringify({ type: "Employee", email: "a@a" }));
+
+      const root = document.createElement("div");
+      root.setAttribute("id", "root");
+      document.body.innerHTML = "";
+      document.body.appendChild(root);
+      router();
+    });
+
+    test("Then it should display 500 error message on UI", async () => {
+      document.body.innerHTML = BillsUI({ error: "Erreur 500" });
+      await waitFor(() => screen.getByText(/Erreur 500/));
+      expect(screen.getByText(/Erreur 500/)).toBeTruthy();
+    });
+
+    test("Then it should display 404 error message on UI", async () => {
+      document.body.innerHTML = BillsUI({ error: "Erreur 404" });
+      await waitFor(() => screen.getByText(/Erreur 404/));
+      expect(screen.getByText(/Erreur 404/)).toBeTruthy();
     });
   });
 })
